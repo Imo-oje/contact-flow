@@ -2,7 +2,7 @@ import assert from "node:assert";
 import { HttpStatusCode } from "../constants/http";
 import ErrorCode from "../constants/error";
 
-class AppError extends Error {
+export class AppError extends Error {
   constructor(
     public statuscode: HttpStatusCode,
     public message: string,

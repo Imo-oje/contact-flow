@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import { APP_ORIGIN } from "./constants/env";
+import { errorHandler } from "./middleware/error-handler";
 
 const app = express();
 
@@ -26,5 +27,7 @@ app.use(morgan("dev"));
 app.use("/health", healthRoutes);
 app.use("/auth", authRoutes);
 app.use("/contacts", contactsRoutes);
+
+app.use(errorHandler);
 
 export default app;
