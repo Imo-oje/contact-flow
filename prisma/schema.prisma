@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  isVerified Boolean @default(false)
+  contacts     Contact[]
+  sessions Session[]
+  verificationCode VerificationCode[]
+}
+
+model Contact {
+  id              String   @id @default(uuid())
+  ownerId         String
+  owner           User     @relation(fields: [ownerId], references: [id])
+  name            String
+  contactValueRaw String
+  contactValueNorm String
+  type            ContactType
+  deletedAt       DateTime? // null if not deleted
+  createdAt       DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([ownerId, contactValueNorm, deletedAt])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  userAgent String
+  ipAddress String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+}
+
+model VerificationCode {
+  id        String               @id @default(uuid())
+  user      User                 @relation(fields: [userId], references: [id])
+  userId    String //Not unique, as a user can have multiple verification codes pending - EMAIL_VERIFICATION and  PASSWORD_RESET
+  type      VerificationCodeType @default(EMAIL_VERIFICATION)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  expiresAt DateTime
+}
+
+enum ContactType {
+  BUSINESS
+  PERSONAL
+}
+
+enum VerificationCodeType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
