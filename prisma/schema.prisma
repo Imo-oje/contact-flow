@@ -21,6 +21,7 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
   isVerified Boolean @default(false)
+  allowSharing Boolean @default(true)
   contacts     Contact[]
   sessions Session[]
   verificationCode VerificationCode[]

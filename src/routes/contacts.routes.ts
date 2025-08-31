@@ -13,7 +13,7 @@ const router = Router();
 router.use(authenticate); // protect all routes
 
 router.post("/", addContact);
-router.get("/mine", getMyContacts);
+router.get("/", getMyContacts);
 router.put("/:contactId", updateContact);
 router.delete("/:contactId", deleteContact);
 

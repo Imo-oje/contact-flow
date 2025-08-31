@@ -7,7 +7,7 @@ import {
   verificatioCodeSchema,
 } from "../utils/schema";
 import bcrypt from "bcrypt";
-import { APP_ORIGIN } from "../constants/env";
+import { APP_ORIGIN, SITE_NAME } from "../constants/env";
 import { sendMail } from "../utils/send-mail";
 import {
   getPasswordResetTemplate,
@@ -95,9 +95,11 @@ export const registerHandler = asyncHandler(async (req, res) => {
   const accessToken = signToken({ userId: user.id, sessionId: session.id });
 
   // Set auth cookies
-  return setAuthCookies(accessToken, refreshToken, res).status(CREATED).json({
-    message: "Sign up successful",
-  });
+  return setAuthCookies(accessToken, refreshToken, res)
+    .status(CREATED)
+    .json({
+      message: `Welcome to ${SITE_NAME}. Let's get started`,
+    });
 });
 
 export const loginHandler = asyncHandler(async (req, res) => {
@@ -111,9 +113,13 @@ export const loginHandler = asyncHandler(async (req, res) => {
   const user = await prisma.user.findFirst({
     where: { email },
   });
-  appAssert(user, UNAUTHORIZED, "Invalid email or password");
+  appAssert(user, UNAUTHORIZED, "Please check your credentials and try again");
   const isValid = await bcrypt.compare(password, user.passwordHash);
-  appAssert(isValid, UNAUTHORIZED, "Invalid email or password");
+  appAssert(
+    isValid,
+    UNAUTHORIZED,
+    "Please check your credentials and try again"
+  );
 
   // Create session
   const session = await prisma.session.create({
@@ -134,7 +140,7 @@ export const loginHandler = asyncHandler(async (req, res) => {
 
   // Set auth cookies
   return setAuthCookies(accessToken, refreshToken, res).status(OK).json({
-    message: "Login successful",
+    message: "You've been logged in successfully",
   });
 });
 

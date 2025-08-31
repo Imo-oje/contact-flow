@@ -3,7 +3,7 @@ import z from "zod";
 // ===== AUTH SCHEMA ===== //
 
 export const emailSchema = z.string().min(1).max(255);
-export const passwordSchema = z.string().min(6).max(255);
+export const passwordSchema = z.string();
 export const verificatioCodeSchema = z.string().min(1).max(255);
 export const stringSchema = z.string().min(1).max(255);
 
@@ -11,13 +11,18 @@ export const loginSchema = z.object({
   email: emailSchema,
   userAgent: z.string(),
   ipAddress: z.string(),
-  password: passwordSchema,
+  password: passwordSchema.min(6, {
+    message: "Please check your credentials and try again",
+  }),
 });
 
 export const registerSchema = () =>
   loginSchema
     .extend({
       name: z.string().min(3).max(60),
+      password: passwordSchema.min(6, {
+        message: "Passwords must not be less than 6 digits",
+      }),
       confirmPassword: passwordSchema,
     })
     .refine((data) => data.password === data.confirmPassword, {
@@ -40,8 +45,8 @@ export const passwordResetSchema = z
 
 export const createContactSchema = () =>
   z.object({
-    fullName: z.string(),
-    phoneNumber: z.string(),
+    name: z.string(),
+    phone: z.string(),
     type: z.enum(["BUSINESS", "PERSONAL"]),
   });
 

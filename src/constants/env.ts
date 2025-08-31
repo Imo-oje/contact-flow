@@ -15,3 +15,4 @@ export const RESEND_API_KEY = getEnv("RESEND_API_KEY") as string;
 export const NODE_ENV = getEnv("NODE_ENV") as string;
 export const EMAIL_SENDER = getEnv("EMAIL_SENDER") as string;
 export const JWT_SECRET = getEnv("JWT_SECRET") as string;
+export const SITE_NAME = getEnv("SITE_NAME") as string;

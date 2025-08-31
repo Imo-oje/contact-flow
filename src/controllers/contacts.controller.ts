@@ -7,19 +7,15 @@ import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "../constants/http";
 
 // Create a new contact
 export const addContact = asyncHandler(async (req, res) => {
-  const {
-    fullName: name,
-    phoneNumber,
-    type,
-  } = createContactSchema().parse(req.body);
+  const { name, phone, type } = createContactSchema().parse(req.body);
   const userId = req.userId;
 
   const contact = await prisma.contact.create({
     data: {
       ownerId: userId,
       name,
-      contactValueRaw: phoneNumber,
-      contactValueNorm: normalizeContact(phoneNumber),
+      contactValueRaw: phone,
+      contactValueNorm: normalizeContact(phone),
       type,
     },
   });
@@ -29,7 +25,7 @@ export const addContact = asyncHandler(async (req, res) => {
     "Contact creation failed, please try again."
   );
 
-  res.status(201).json(contact);
+  res.status(201).json(serializeContact(contact));
 });
 
 // List user's own contacts
@@ -39,13 +35,14 @@ export const getMyContacts = asyncHandler(async (req, res) => {
     where: { ownerId: userId, deletedAt: null },
     orderBy: { createdAt: "desc" },
   });
-  res.json(contacts);
+  const result = contacts.map((contact) => serializeContact(contact));
+  res.json(result);
 });
 
 // Update contact
 export const updateContact = asyncHandler(async (req, res) => {
   const { contactId } = req.params;
-  const { fullName, phoneNumber, type } = updateContactSchema().parse(req.body);
+  const { name, phone, type } = updateContactSchema().parse(req.body);
   const userId = req.userId;
 
   const contact = await prisma.contact.findFirst({
@@ -56,10 +53,10 @@ export const updateContact = asyncHandler(async (req, res) => {
   const updated = await prisma.contact.update({
     where: { id: contactId, ownerId: userId, deletedAt: null },
     data: {
-      name: fullName ?? contact.name,
-      contactValueRaw: phoneNumber ?? contact.contactValueRaw,
-      contactValueNorm: phoneNumber
-        ? normalizeContact(phoneNumber)
+      name: name ?? contact.name,
+      contactValueRaw: phone ?? contact.contactValueRaw,
+      contactValueNorm: phone
+        ? normalizeContact(phone)
         : contact.contactValueNorm,
       type: type ?? contact.type,
     },
