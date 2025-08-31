@@ -1,4 +1,4 @@
-import { Contact, User } from "../../generated/prisma";
+import type { Contact, User } from "@prisma/client";
 import { SerializedContact, SerializedUser } from "../types";
 
 export function normalizeContact(value: string): string {
