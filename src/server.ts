@@ -5,5 +5,5 @@ import app from "./app";
 import { PORT } from "./constants/env";
 
 app.listen(PORT == null || PORT == "" ? 8000 : PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`[[ SERVER ]]: Running on http://localhost:${PORT}`);
 });
