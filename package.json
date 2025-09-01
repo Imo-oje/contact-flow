@@ -20,6 +20,10 @@
   "bugs": {
     "url": "https://github.com/Imo-oje/contact-flow/issues"
   },
+  "engines": {
+    "node": "20.19.3",
+    "npm": ">=10"
+  },
   "homepage": "https://github.com/Imo-oje/contact-flow#readme",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
