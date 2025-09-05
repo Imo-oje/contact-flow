@@ -23,3 +23,12 @@ export function serializeUser(user: User): SerializedUser {
   const { id, name, email, allowSharing } = user;
   return { id, name, email, allowSharing };
 }
+
+export const serializeContactsToJson = (
+  contacts: Pick<Contact, "contactValueNorm" | "name">[]
+) => {
+  return contacts.map((contact) => ({
+    name: contact.name,
+    phone: contact.contactValueNorm,
+  }));
+};

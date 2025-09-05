@@ -4,6 +4,7 @@ import healthRoutes from "./routes/health.routes";
 import contactsRoutes from "./routes/contacts.routes";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
+import csvRoutes from "./routes/csv.routes";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import { APP_ORIGIN } from "./constants/env";
@@ -29,6 +30,7 @@ app.use("/health", healthRoutes);
 app.use("/auth", authRoutes);
 app.use("/contacts", contactsRoutes);
 app.use("/user", userRoutes);
+app.use("/csv", csvRoutes);
 
 app.use(errorHandler);
 

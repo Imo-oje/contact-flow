@@ -1,5 +1,9 @@
 import prisma from "../prisma/client";
-import { normalizeContact, serializeContact } from "../utils/sanitize";
+import {
+  normalizeContact,
+  serializeContact,
+  serializeContactsToJson,
+} from "../utils/sanitize";
 import { asyncHandler } from "../utils/async-handler";
 import { createContactSchema, updateContactSchema } from "../utils/schema";
 import appAssert from "../utils/app-assert";
@@ -101,4 +105,19 @@ export const restoreContact = asyncHandler(async (req, res) => {
     "Contact not found or already active"
   );
   res.json({ message: "Contact restored" });
+});
+
+export const exportPersonalContacts = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const contacts = await prisma.contact.findMany({
+    where: { owner: { id: userId } },
+    select: {
+      contactValueNorm: true,
+      name: true,
+    },
+  });
+  console.log(serializeContactsToJson(contacts));
+
+  res.json({ message: "Export started. You'll get a link when ready." });
 });

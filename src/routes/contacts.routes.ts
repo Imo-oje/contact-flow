@@ -4,7 +4,7 @@ import {
   getMyContacts,
   updateContact,
   deleteContact,
-  restoreContact,
+  exportPersonalContacts,
 } from "../controllers/contacts.controller";
 import { authenticate } from "../middleware/auth";
 
@@ -16,6 +16,9 @@ router.post("/", addContact);
 router.get("/", getMyContacts);
 router.put("/:contactId", updateContact);
 router.delete("/:contactId", deleteContact);
+
+// Premium fetures
+router.get("/export", exportPersonalContacts);
 
 // Future updates
 // router.get("/restore/:contactId", restoreContact);
