@@ -110,8 +110,11 @@ export const restoreContact = asyncHandler(async (req, res) => {
 export const exportPersonalContacts = asyncHandler(async (req, res) => {
   const userId = req.userId;
 
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
   const contacts = await prisma.contact.findMany({
-    where: { owner: { id: userId } },
+    where: { owner: { id: user.id } },
     select: {
       contactValueNorm: true,
       name: true,
