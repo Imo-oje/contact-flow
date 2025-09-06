@@ -24,9 +24,7 @@ export function serializeUser(user: User): SerializedUser {
   return { id, name, email, allowSharing };
 }
 
-export const serializeContactsToJson = (
-  contacts: Pick<Contact, "contactValueNorm" | "name">[]
-) => {
+export const serializeContactsToJson = (contacts: Contact[]) => {
   return contacts.map((contact) => ({
     name: contact.name,
     phone: contact.contactValueNorm,

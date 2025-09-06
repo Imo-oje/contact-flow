@@ -12,10 +12,6 @@ export const csvDownload = asyncHandler(async (req, res) => {
 
   const contacts = await prisma.contact.findMany({
     where: { owner: { id: { not: user.id } } },
-    select: {
-      contactValueNorm: true,
-      name: true,
-    },
   });
   console.log(serializeContactsToJson(contacts));
 

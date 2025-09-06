@@ -115,10 +115,6 @@ export const exportPersonalContacts = asyncHandler(async (req, res) => {
 
   const contacts = await prisma.contact.findMany({
     where: { owner: { id: user.id } },
-    select: {
-      contactValueNorm: true,
-      name: true,
-    },
   });
   console.log(serializeContactsToJson(contacts));
 
