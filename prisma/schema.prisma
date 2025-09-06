@@ -73,6 +73,14 @@ model Compilation {
   updatedAt DateTime @updatedAt
 }
 
+model CompilationKey {
+  id String @id @default(uuid())
+  value String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+}
+
 enum ContactType {
   BUSINESS
   PERSONAL
