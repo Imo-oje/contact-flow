@@ -5,6 +5,6 @@ import { authenticate } from "../middleware/auth";
 const router = Router();
 router.use(authenticate);
 
-router.get("/download", csvDownload);
+router.get("/download/:fileId", csvDownload);
 
 export default router;

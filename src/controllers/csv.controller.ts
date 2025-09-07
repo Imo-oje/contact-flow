@@ -3,17 +3,28 @@ import prisma from "../prisma/client";
 import { serializeContactsToJson } from "../utils/sanitize";
 import appAssert from "../utils/app-assert";
 import { NOT_FOUND } from "../constants/http";
+import { convertToCsv } from "../utils/csv";
+import { writeFile } from "fs/promises";
 
 export const csvDownload = asyncHandler(async (req, res) => {
   const userId = req.userId;
-
-  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  const { fileId } = req.params;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   appAssert(user, NOT_FOUND, "User not found");
 
-  const contacts = await prisma.contact.findMany({
-    where: { owner: { id: { not: user.id } } },
+  const compiled = await prisma.compilation.findUnique({
+    where: { id: fileId },
+    include: { contacts: true },
   });
-  console.log(serializeContactsToJson(contacts));
+  appAssert(compiled, NOT_FOUND, "Compilation not found");
 
-  res.json(serializeContactsToJson(contacts));
+  const contacts = serializeContactsToJson(
+    compiled.contacts.map((contact) => ({ ...contact }))
+  );
+
+  const csv = await convertToCsv(contacts);
+  res
+    .setHeader("Content-Type", "text/csv")
+    .setHeader("Content-Disposition", `attachment; filename=${compiled.name}`)
+    .send(csv);
 });

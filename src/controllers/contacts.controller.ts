@@ -14,9 +14,12 @@ export const addContact = asyncHandler(async (req, res) => {
   const { name, phone, type } = createContactSchema().parse(req.body);
   const userId = req.userId;
 
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
   const contact = await prisma.contact.create({
     data: {
-      ownerId: userId,
+      ownerId: user.id,
       name,
       contactValueRaw: phone,
       contactValueNorm: normalizeContact(phone),
@@ -35,8 +38,11 @@ export const addContact = asyncHandler(async (req, res) => {
 // List user's own contacts
 export const getMyContacts = asyncHandler(async (req, res) => {
   const userId = req.userId;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
   const contacts = await prisma.contact.findMany({
-    where: { ownerId: userId, deletedAt: null },
+    where: { ownerId: user.id, deletedAt: null },
     orderBy: { createdAt: "desc" },
   });
   const result = contacts.map((contact) => serializeContact(contact));
@@ -49,13 +55,16 @@ export const updateContact = asyncHandler(async (req, res) => {
   const { name, phone, type } = updateContactSchema().parse(req.body);
   const userId = req.userId;
 
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
   const contact = await prisma.contact.findFirst({
-    where: { id: contactId, ownerId: userId, deletedAt: null },
+    where: { id: contactId, ownerId: user.id, deletedAt: null },
   });
   appAssert(contact, NOT_FOUND, "Contact not found");
 
   const updated = await prisma.contact.update({
-    where: { id: contactId, ownerId: userId, deletedAt: null },
+    where: { id: contactId, ownerId: user.id, deletedAt: null },
     data: {
       name: name ?? contact.name,
       contactValueRaw: phone ?? contact.contactValueRaw,
@@ -76,13 +85,16 @@ export const deleteContact = asyncHandler(async (req, res) => {
   const { contactId } = req.params;
   const userId = req.userId;
 
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
   const contact = await prisma.contact.findFirst({
-    where: { id: contactId, ownerId: userId, deletedAt: null },
+    where: { id: contactId, ownerId: user.id, deletedAt: null },
   });
   appAssert(contact, NOT_FOUND, "Contact not found");
 
   await prisma.contact.update({
-    where: { id: contactId },
+    where: { id: contactId, ownerId: user.id },
     data: { deletedAt: new Date() },
   });
 
@@ -94,8 +106,11 @@ export const restoreContact = asyncHandler(async (req, res) => {
   const { contactId } = req.params;
   const userId = req.userId;
 
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
   const restored = await prisma.contact.updateMany({
-    where: { id: contactId, ownerId: userId, deletedAt: { not: null } },
+    where: { id: contactId, ownerId: user.id, deletedAt: { not: null } },
     data: { deletedAt: null },
   });
 
@@ -110,13 +125,12 @@ export const restoreContact = asyncHandler(async (req, res) => {
 export const exportPersonalContacts = asyncHandler(async (req, res) => {
   const userId = req.userId;
 
-  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   appAssert(user, NOT_FOUND, "User not found");
 
   const contacts = await prisma.contact.findMany({
-    where: { owner: { id: user.id } },
+    where: { owner: { id: user.id }, ownerId: user.id },
   });
-  console.log(serializeContactsToJson(contacts));
 
   res.json({ message: "Export started. You'll get a link when ready." });
 });
