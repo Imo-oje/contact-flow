@@ -31,8 +31,8 @@ model Contact {
   ownerId         String
   owner           User     @relation(fields: [ownerId], references: [id])
   name            String
-  contactValueRaw String
-  contactValueNorm String
+  contactValueRaw String @unique
+  contactValueNorm String @unique
   compilationId String?  // can be null if not compiled yet (doesn't belong to any compilation)
   compiledTo Compilation? @relation(fields: [compilationId],references: [id])
   type            ContactType
