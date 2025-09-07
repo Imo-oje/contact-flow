@@ -17,4 +17,3 @@ export const JWT_SECRET = getEnv("JWT_SECRET") as string;
 export const SITE_NAME = getEnv("SITE_NAME") as string;
 export const MAILER_SEND_API_KEY = getEnv("MAILER_SEND_API_KEY") as string;
 export const EMAIL_TEST_RECEIVER = getEnv("EMAIL_TEST_RECEIVER") as string;
-export const USER_ID = getEnv("USER_ID") as string;

@@ -7,12 +7,10 @@ import {
   exportPersonalContacts,
 } from "../controllers/contacts.controller";
 import { authenticate } from "../middleware/auth";
-import { USER_ID } from "../constants/env";
-import { bypassAuth } from "../dev/bypassAuth";
 
 const router = Router();
 
-router.use(USER_ID ? bypassAuth : authenticate); // protect all routes
+router.use(authenticate); // protect all routes
 
 router.post("/", addContact);
 router.get("/", getMyContacts);

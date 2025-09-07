@@ -3,11 +3,10 @@ import appAssert from "../utils/app-assert";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "../constants/http";
 import { asyncHandler } from "../utils/async-handler";
 import { getTodaysDate } from "../utils/date";
-import { serializeContactsToJson } from "../utils/sanitize";
 
 export const compileContacts = asyncHandler(async (req, res, next) => {
   const unCompiledContacts = await prisma.contact.findMany({
-    where: { compilationId: null, compiledTo: null },
+    where: { compilationId: null, compiledTo: null, deletedAt: null },
   });
 
   let compilation = await prisma.compilation.findFirst({
@@ -32,7 +31,7 @@ export const compileContacts = asyncHandler(async (req, res, next) => {
 
   // Link contacts by updating their compilationId
   await prisma.contact.updateMany({
-    where: { id: { in: unCompiledContacts.map((c) => c.id) } },
+    where: { id: { in: unCompiledContacts.map((c) => c.id) }, deletedAt: null },
     data: { compilationId: compilation.id },
   });
 
@@ -48,5 +47,7 @@ export const compileContacts = asyncHandler(async (req, res, next) => {
     "Could not get compilation after update"
   );
 
-  res.json(serializeContactsToJson(updatedCompilation.contacts));
+  res.json({
+    count: `${unCompiledContacts.length} new contacts added. Total compiled: ${updatedCompilation.contacts.length}`,
+  });
 });
