@@ -21,7 +21,6 @@ export const addContact = asyncHandler(async (req, res) => {
     data: {
       ownerId: user.id,
       name,
-      contactValueRaw: phone,
       contactValueNorm: normalizeContact(phone),
       type,
     },
@@ -67,7 +66,6 @@ export const updateContact = asyncHandler(async (req, res) => {
     where: { id: contact.id, ownerId: user.id, deletedAt: null },
     data: {
       name: name ?? contact.name,
-      contactValueRaw: phone ?? contact.contactValueRaw,
       contactValueNorm: phone
         ? normalizeContact(phone)
         : contact.contactValueNorm,
