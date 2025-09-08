@@ -1,5 +1,9 @@
-import type { Contact, User } from "@prisma/client";
+import type { Compilation, Contact, User } from "@prisma/client";
 import { SerializedContact, SerializedUser } from "../types";
+
+interface SerializeCsv extends Compilation {
+  contacts: Contact[];
+}
 
 export function normalizeContact(value: string): string {
   return value
@@ -28,5 +32,14 @@ export const serializeContactsToJson = (contacts: Contact[]) => {
   return contacts.map((contact) => ({
     name: contact.name,
     phone: contact.contactValueNorm,
+  }));
+};
+
+export const serializeCsv = (csv: SerializeCsv[]) => {
+  return csv.map((i) => ({
+    id: i.id,
+    name: i.name,
+    createdAt: i.createdAt,
+    count: i.contacts.length,
   }));
 };

@@ -64,7 +64,7 @@ export const updateContact = asyncHandler(async (req, res) => {
   appAssert(contact, NOT_FOUND, "Contact not found");
 
   const updated = await prisma.contact.update({
-    where: { id: contactId, ownerId: user.id, deletedAt: null },
+    where: { id: contact.id, ownerId: user.id, deletedAt: null },
     data: {
       name: name ?? contact.name,
       contactValueRaw: phone ?? contact.contactValueRaw,

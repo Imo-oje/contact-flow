@@ -1,10 +1,27 @@
 import { asyncHandler } from "../utils/async-handler";
 import prisma from "../prisma/client";
-import { serializeContactsToJson } from "../utils/sanitize";
+import { serializeContactsToJson, serializeCsv } from "../utils/sanitize";
 import appAssert from "../utils/app-assert";
 import { NOT_FOUND } from "../constants/http";
 import { convertToCsv } from "../utils/csv";
-import { writeFile } from "fs/promises";
+
+export const getCsv = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
+  const csvFiles = await prisma.compilation.findMany({
+    where: {
+      createdAt: {
+        gt: user.createdAt,
+        lte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      },
+    },
+    include: { contacts: true },
+  });
+
+  res.json(serializeCsv(csvFiles) || []);
+});
 
 export const csvDownload = asyncHandler(async (req, res) => {
   const userId = req.userId;

@@ -1,4 +1,4 @@
-import { NOT_FOUND, OK } from "../constants/http";
+import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
 import prisma from "../prisma/client";
 import appAssert from "../utils/app-assert";
 import { asyncHandler } from "../utils/async-handler";
@@ -32,4 +32,22 @@ export const getUser = asyncHandler(async (req, res) => {
     contactsCount: user._count.contacts,
     networkGrowth: `+${newConnectionsThisWeek}`,
   });
+});
+
+export const toggleSharingStatus = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { _count: { select: { contacts: true } } },
+  });
+  appAssert(user, NOT_FOUND, "User not found");
+
+  const update = await prisma.user.update({
+    where: { id: user.id },
+    data: { allowSharing: !user.allowSharing },
+  });
+  appAssert(update, INTERNAL_SERVER_ERROR, "Error updating status");
+
+  res.json(update.allowSharing);
 });
