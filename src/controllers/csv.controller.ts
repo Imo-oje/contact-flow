@@ -4,6 +4,8 @@ import { serializeContactsToJson, serializeCsv } from "../utils/sanitize";
 import appAssert from "../utils/app-assert";
 import { NOT_FOUND } from "../constants/http";
 import { convertToCsv } from "../utils/csv";
+import { twentyFourHoursAgo, fiveMinutesAgo } from "../utils/date";
+import { NODE_ENV } from "../constants/env";
 
 export const getCsv = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -14,7 +16,8 @@ export const getCsv = asyncHandler(async (req, res) => {
     where: {
       createdAt: {
         gt: user.createdAt,
-        lte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        lte:
+          NODE_ENV === "development" ? fiveMinutesAgo() : twentyFourHoursAgo(), // older than 5min || 24hrs
       },
     },
     include: { contacts: true },
@@ -24,10 +27,7 @@ export const getCsv = asyncHandler(async (req, res) => {
 });
 
 export const csvDownload = asyncHandler(async (req, res) => {
-  const userId = req.userId;
   const { fileId } = req.params;
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  appAssert(user, NOT_FOUND, "User not found");
 
   const compiled = await prisma.compilation.findUnique({
     where: { id: fileId },
@@ -40,8 +40,5 @@ export const csvDownload = asyncHandler(async (req, res) => {
   );
 
   const csv = await convertToCsv(contacts);
-  res
-    .setHeader("Content-Type", "text/csv")
-    .setHeader("Content-Disposition", `attachment; filename=${compiled.name}`)
-    .send(csv);
+  res.json(csv);
 });

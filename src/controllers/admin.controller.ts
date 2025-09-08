@@ -2,9 +2,15 @@ import prisma from "../prisma/client";
 import appAssert from "../utils/app-assert";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "../constants/http";
 import { asyncHandler } from "../utils/async-handler";
-import { getTodaysDate } from "../utils/date";
+import {
+  getTodaysDate,
+  twentyFourHoursAgo,
+  fiveMinutesAgo,
+} from "../utils/date";
+import { NODE_ENV } from "../constants/env";
+import { stringSchema } from "../utils/schema";
 
-export const compileContacts = asyncHandler(async (req, res, next) => {
+export const compileContacts = asyncHandler(async (req, res) => {
   const unCompiledContacts = await prisma.contact.findMany({
     where: { compilationId: null, compiledTo: null, deletedAt: null },
   });
@@ -13,7 +19,8 @@ export const compileContacts = asyncHandler(async (req, res, next) => {
     where: {
       name: getTodaysDate(),
       createdAt: {
-        gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // within last 24hrs
+        gte:
+          NODE_ENV === "development" ? fiveMinutesAgo() : twentyFourHoursAgo(), // within last 5mins || 24hrs
         lte: new Date(),
       },
     },
@@ -50,4 +57,23 @@ export const compileContacts = asyncHandler(async (req, res, next) => {
   res.json({
     count: `${unCompiledContacts.length} new contacts added. Total compiled: ${updatedCompilation.contacts.length}`,
   });
+});
+
+export const banContacts = asyncHandler(async (req, res) => {
+  const phone = stringSchema.parse(req.body.contact);
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  appAssert(user, NOT_FOUND, "User not found");
+
+  const contact = await prisma.contact.findUnique({
+    where: { contactValueNorm: phone, isBanAt: null },
+  });
+  appAssert(contact, NOT_FOUND, "Contact not found or already banned");
+
+  await prisma.contact.update({
+    where: { id: contact.id },
+    data: { isBanAt: new Date() },
+  });
+
+  res.json({ message: "Ban successful" });
 });

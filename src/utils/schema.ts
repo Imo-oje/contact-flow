@@ -51,3 +51,9 @@ export const createContactSchema = () =>
   });
 
 export const updateContactSchema = () => createContactSchema().partial();
+
+export const reportContactSchema = () =>
+  z.object({
+    reason: z.string().max(1024),
+    phone: z.string().min(3).max(11),
+  });

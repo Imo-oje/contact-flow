@@ -5,6 +5,7 @@ import {
   updateContact,
   deleteContact,
   exportPersonalContacts,
+  reportContact,
 } from "../controllers/contacts.controller";
 import { authenticate } from "../middleware/auth";
 
@@ -16,6 +17,7 @@ router.post("/", addContact);
 router.get("/", getMyContacts);
 router.put("/:contactId", updateContact);
 router.delete("/:contactId", deleteContact);
+router.get("/report", reportContact);
 
 // Premium fetures
 router.get("/export", exportPersonalContacts);

@@ -10,7 +10,9 @@ export const getUser = asyncHandler(async (req, res) => {
   // Fetch user with count of contacts
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { _count: { select: { contacts: true } } },
+    include: {
+      _count: { select: { contacts: { where: { deletedAt: null } } } },
+    },
   });
   appAssert(user, NOT_FOUND, "User not found");
 
@@ -44,7 +46,7 @@ export const toggleSharingStatus = asyncHandler(async (req, res) => {
   appAssert(user, NOT_FOUND, "User not found");
 
   const update = await prisma.user.update({
-    where: { id: user.id },
+    where: { id: userId },
     data: { allowSharing: !user.allowSharing },
   });
   appAssert(update, INTERNAL_SERVER_ERROR, "Error updating status");

@@ -14,30 +14,32 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  isVerified Boolean @default(false)
-  allowSharing Boolean @default(true)
-  contacts     Contact[]
-  sessions Session[]
-  verificationCode VerificationCode[]
+  id                String   @id @default(uuid())
+  name              String
+  email             String   @unique
+  passwordHash      String
+  createdAt         DateTime @default(now())
+  isVerified        Boolean @default(false)
+  allowSharing      Boolean @default(true)
+  contacts          Contact[]
+  sessions          Session[]
+  reports           Report[]
+  verificationCode  VerificationCode[]
 }
 
 model Contact {
-  id              String   @id @default(uuid())
-  ownerId         String
-  owner           User     @relation(fields: [ownerId], references: [id])
-  name            String
-  contactValueNorm String @unique
-  compilationId String?  // can be null if not compiled yet (doesn't belong to any compilation)
-  compiledTo Compilation? @relation(fields: [compilationId],references: [id])
-  type            ContactType
-  deletedAt       DateTime? // null if not deleted
-  createdAt       DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String   @id @default(uuid())
+  ownerId           String
+  owner             User     @relation(fields: [ownerId], references: [id])
+  name              String
+  contactValueNorm  String    @unique
+  compilationId     String?  // can be null if not compiled yet (doesn't belong to any compilation)
+  compiledTo        Compilation? @relation(fields: [compilationId],references: [id])
+  isBanAt           DateTime?
+  type              ContactType
+  deletedAt         DateTime? // null if not deleted
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([ownerId, contactValueNorm, deletedAt])
 }
@@ -64,20 +66,30 @@ model VerificationCode {
 }
 
 model Compilation {
-  id String @id @default(uuid())
-  name String
+  id        String      @id @default(uuid())
+  name      String
   downloads String[]
-  contacts Contact[]
-  createdAt       DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  contacts  Contact[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 model CompilationKey {
-  id String @id @default(uuid())
-  value String
+  id        String      @id @default(uuid())
+  value     String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  expiresAt DateTime
+}
+
+model Report {
+  id        String @id @default(uuid())
+  phone     String
+  reason    String
+  filedById String
+  filedBy   User @relation(fields:[filedById],references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  expiresAt DateTime
 }
 
 enum ContactType {
