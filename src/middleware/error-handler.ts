@@ -17,7 +17,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
   if (error instanceof AppError) {
     console.log("APPERROR");
     const { statuscode, message, errorCode } = error;
-    res.status(statuscode).json({
+    return res.status(statuscode).json({
       message,
       errorCode,
     });
@@ -27,7 +27,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
     error.name === "PayloadTooLargeError" ||
     error.type === "entity.too.large"
   ) {
-    res.status(REQUEST_ENTITY_TOO_LARGE).json({
+    return res.status(REQUEST_ENTITY_TOO_LARGE).json({
       message: "Payload too large",
       limit: error.limit,
     });
@@ -35,7 +35,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
 
   if (error instanceof PrismaClientValidationError) {
     const { name } = error;
-    res
+    return res
       .status(INTERNAL_SERVER_ERROR)
       .json({ message: "Client validation failed", name });
   }
@@ -62,13 +62,17 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
   }
 
   if (error instanceof ZodError) {
-    res.status(INTERNAL_SERVER_ERROR).json({
-      message: error.issues.map((issue) => ({
-        message: issue.message,
-        path: issue.path,
-      })),
+    const mapped = error.issues.map((issue) => ({
+      message: issue.message,
+      path: issue.path,
+    }));
+    return res.status(INTERNAL_SERVER_ERROR).json({
+      message: mapped[0].message,
+      path: mapped[0].path[0],
     });
   }
 
-  res.status(500).json({ message: "Internal Server Error" });
+  return res
+    .status(INTERNAL_SERVER_ERROR)
+    .json({ message: "Internal Server Error" });
 };

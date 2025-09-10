@@ -161,6 +161,10 @@ export const refreshHandler = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   appAssert(refreshToken, UNAUTHORIZED, "Invalid refresh token");
 
+  console.log(
+    "============================refresh ================================="
+  );
+
   // Verify token
   const { payload } = verifyToken(refreshToken, {
     secret: refreshTokenSignOptions.secret,

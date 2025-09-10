@@ -55,6 +55,9 @@ export const updateContactSchema = () => createContactSchema().partial();
 export const reportContactSchema = () =>
   z.object({
     reason: z.string().max(30),
-    phone: z.string().min(3).max(11),
+    phone: z
+      .string()
+      .min(11, { message: "Invalid phone number" })
+      .max(11, { message: "Invalid phone number" }),
     message: z.string().max(1024),
   });

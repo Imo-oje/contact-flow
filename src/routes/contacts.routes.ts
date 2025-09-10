@@ -17,7 +17,7 @@ router.post("/", addContact);
 router.get("/", getMyContacts);
 router.put("/:contactId", updateContact);
 router.delete("/:contactId", deleteContact);
-router.get("/report", reportContact);
+router.post("/report", reportContact);
 
 // Premium fetures
 router.get("/export", exportPersonalContacts);

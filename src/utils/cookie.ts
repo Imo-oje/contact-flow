@@ -18,7 +18,7 @@ export const accessTokenCookieOptions = () => ({
 export const refreshTokenCookieOptions = () => ({
   ...defaults,
   expires: thirtyDaysFromNow(),
-  path: "/api/v1/auth/refresh", // Refresh tokens will be sent on this path
+  path: "/auth/refresh", // Refresh tokens will be sent on this path
 });
 
 export const setAuthCookies = (
@@ -34,3 +34,5 @@ export const clearAuthCookies = (res: Response) =>
   res
     .clearCookie("accessToken")
     .clearCookie("refreshToken", { path: "/auth/refresh" });
+
+// fix(refreshToken): fixed the Invalid refresh token error that occurs on every refresh request
