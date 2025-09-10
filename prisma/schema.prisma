@@ -86,6 +86,7 @@ model Report {
   id        String @id @default(uuid())
   phone     String
   reason    String
+  message   String
   filedById String
   filedBy   User @relation(fields:[filedById],references: [id])
   createdAt DateTime @default(now())

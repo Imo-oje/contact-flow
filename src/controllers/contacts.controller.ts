@@ -118,11 +118,11 @@ export const exportPersonalContacts = asyncHandler(async (req, res) => {
 
 export const reportContact = asyncHandler(async (req, res) => {
   const userId = req.userId;
-  const { phone, reason } = reportContactSchema().parse(req.body);
+  const { phone, reason, message } = reportContactSchema().parse(req.body);
 
-  const report = await prisma.report.create({
-    data: { phone, reason, filedById: userId },
+  await prisma.report.create({
+    data: { phone, reason, message, filedById: userId },
   });
 
-  res.json(report);
+  res.json({ status: true });
 });
