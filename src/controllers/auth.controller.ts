@@ -8,7 +8,7 @@ import {
 } from "../utils/schema";
 import bcrypt from "bcrypt";
 import { APP_ORIGIN, SITE_NAME } from "../constants/env";
-import { sendMail } from "../utils/send-mail";
+import { sendMail } from "../services/nodemailer";
 import {
   getPasswordResetTemplate,
   getVerifyEmailTemplate,
