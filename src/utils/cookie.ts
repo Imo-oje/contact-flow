@@ -34,5 +34,3 @@ export const clearAuthCookies = (res: Response) =>
   res
     .clearCookie("accessToken")
     .clearCookie("refreshToken", { path: "/auth/refresh" });
-
-// fix(refreshToken): fixed the Invalid refresh token error that occurs on every refresh request

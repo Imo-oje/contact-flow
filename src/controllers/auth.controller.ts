@@ -161,10 +161,6 @@ export const refreshHandler = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   appAssert(refreshToken, UNAUTHORIZED, "Invalid refresh token");
 
-  console.log(
-    "============================refresh ================================="
-  );
-
   // Verify token
   const { payload } = verifyToken(refreshToken, {
     secret: refreshTokenSignOptions.secret,
@@ -241,14 +237,26 @@ export const sendPasswordResetEmailHandler = asyncHandler(async (req, res) => {
   const email = emailSchema.parse(req.body.email);
 
   const user = await prisma.user.findUnique({ where: { email } });
-  appAssert(user, NOT_FOUND, "User not found");
 
-  // Handle too many requests
+  // Do not reveal if user exists or not
+  if (!user) {
+    // Always return a generic success message
+    return res
+      .status(OK)
+      .json({ message: "If an account exists, a reset email has been sent" });
+  }
+
+  // Handle rate limiting (per user)
   const fiveMinAgo = fiveMinutesAgo();
   const count = await prisma.verificationCode.count({
-    where: { createdAt: { gt: fiveMinAgo } },
+    where: { userId: user.id, createdAt: { gt: fiveMinAgo } },
   });
-  appAssert(count <= 1, TOO_MANY_REQUESTS, "Too many requests");
+
+  if (count > 1) {
+    return res
+      .status(TOO_MANY_REQUESTS)
+      .json({ message: "Please wait before requesting another reset email" });
+  }
 
   // Create verification code
   const expiresAt = tenMinutesFromNow();
@@ -260,13 +268,21 @@ export const sendPasswordResetEmailHandler = asyncHandler(async (req, res) => {
   const url = `${APP_ORIGIN}/auth/reset-password?code=${
     verificationCode.id
   }&exp=${expiresAt.getTime()}`;
+  try {
+    await sendMail({
+      to: user.email,
+      ...getPasswordResetTemplate(url),
+    });
+  } catch (err) {
+    console.error("Email send error:", err); // log internally
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json({ message: "Something went wrong, please try again later" });
+  }
 
-  const data = await sendMail({
-    to: user.email,
-    ...getPasswordResetTemplate(url),
-  });
-  appAssert(data, INTERNAL_SERVER_ERROR, "Error sending verification email");
-  return res.status(OK).json({ message: "Password reset email sent" });
+  return res
+    .status(OK)
+    .json({ message: "If an account exists, a reset email has been sent" });
 });
 
 export const resetPasswordHandler = asyncHandler(async (req, res) => {

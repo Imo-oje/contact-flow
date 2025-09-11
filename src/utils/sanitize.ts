@@ -24,8 +24,8 @@ export function serializeContact(contact: Contact): SerializedContact {
 }
 
 export function serializeUser(user: User): SerializedUser {
-  const { id, name, email, allowSharing } = user;
-  return { id, name, email, allowSharing };
+  const { id, name, email, allowSharing, isVerified } = user;
+  return { id, name, email, allowSharing, isVerified };
 }
 
 export const serializeContactsToJson = (contacts: Contact[]) => {

@@ -11,4 +11,5 @@ export interface SerializedUser {
   name: string;
   email: string;
   allowSharing: boolean;
+  isVerified: boolean;
 }
