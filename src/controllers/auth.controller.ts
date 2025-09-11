@@ -230,7 +230,7 @@ export const verifyEmailHandler = asyncHandler(async (req, res) => {
 
   await prisma.verificationCode.delete({ where: { id: verificationCode.id } });
 
-  return res.status(OK).json({ message: "Email verified" });
+  return res.status(OK).json({ message: "Email verified successfully" });
 });
 
 export const sendPasswordResetEmailHandler = asyncHandler(async (req, res) => {
